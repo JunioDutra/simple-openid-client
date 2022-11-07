@@ -46,14 +46,17 @@ class OpenIdClientClass {
 
   async getTokens(code) {
     const tokenUrl = `${this.wellKnowUrls.token_endpoint}?grant_type=${this.configs?.grant_type
-      }&code=${code}&redirect_uri=${this.configs?.redirect_uris?.join(",")}${this.codeVerifier ? `&code_verifier=${this.codeVerifier}` : ''}`;
+      }&code=${code}&redirect_uri=${this.configs?.redirect_uris?.join(",")}${this.codeVerifier ? `&code_verifier=${this.codeVerifier}&client_id=${this.configs.client_id}` : ''}`;
 
     const headers = {
       "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Basic ${Buffer.from(
-        `${this.configs?.client_id}:${this.configs?.client_secret}`
-      ).toString("base64")}`,
     };
+
+    if (!this.codeVerifier) {
+      this.headers.Authorization = `Basic ${Buffer.from(
+        `${this.configs?.client_id}:${this.configs?.client_secret}`
+      ).toString("base64")}`;
+    }
 
     try {
       const { data } = await axios.post(tokenUrl, {}, { headers });
